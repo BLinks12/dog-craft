@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DogCraft - ASCII Dog Generator</title>
+    <title>DogCraft 3.0 - Enhanced ASCII Dogs</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,12 +27,13 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
 
         .header {
             text-align: center;
             padding: 2rem;
-            background: linear-gradient(45deg, var(--secondary), transparent);
+            width: 100%;
             border-bottom: 3px solid var(--primary);
         }
 
@@ -42,38 +43,6 @@
             letter-spacing: 3px;
             margin-bottom: 1rem;
             text-shadow: 0 0 15px var(--primary);
-        }
-
-        .wallet-section {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 1rem;
-            border: 2px dashed var(--primary);
-            border-radius: 10px;
-        }
-
-        .connect-btn {
-            background: var(--secondary);
-            color: white;
-            border: 2px solid var(--primary);
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 5px;
-        }
-
-        .connect-btn:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        .wallet-status {
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: var(--card-bg);
-            border-radius: 5px;
         }
 
         .generator-box {
@@ -123,28 +92,8 @@
             font-family: 'Courier New', Courier, monospace;
             position: relative;
             overflow: hidden;
-        }
-
-        .dog-display::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 45%,
-                var(--primary) 50%,
-                transparent 55%
-            );
-            animation: scan 4s infinite linear;
-            opacity: 0.1;
-        }
-
-        @keyframes scan {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
+            max-width: 600px;
+            width: 90%;
         }
 
         .loading-overlay {
@@ -169,10 +118,6 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         .error-message {
             color: var(--error);
             margin: 1rem 0;
@@ -185,52 +130,56 @@
             padding: 2rem;
             text-align: center;
             background: var(--card-bg);
+            width: 100%;
         }
 
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: help;
+        /* New Enhanced Styles */
+        .fur-brown { color: #8B4513; }
+        .fur-golden { color: #FFD700; }
+        .fur-black { color: #2c2c2c; }
+        .fur-spotted { 
+            background: linear-gradient(45deg, #2c2c2c 25%, #8B4513 25% 50%, #FFD700 50% 75%, #fff 75%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 200px;
-            background: var(--card-bg);
-            color: var(--primary);
-            text-align: center;
+        
+        .dna-display {
+            font-family: monospace;
+            letter-spacing: 2px;
+            color: #00ff9d;
+            margin: 1rem 0;
+            word-break: break-all;
+        }
+        
+        .traits-box {
             border: 1px solid var(--primary);
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        
+        .trait-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(0, 255, 157, 0.1);
+            border-radius: 3px;
         }
 
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>DogCraft 2.0</h1>
-        <p>Generate Unique ASCII Dogs on Solana</p>
+        <h1>DogCraft 3.0</h1>
+        <p>Advanced ASCII Dog Generator</p>
     </header>
-
-    <div class="wallet-section">
-        <button class="connect-btn" id="connectBtn">CONNECT PHANTOM WALLET</button>
-        <div class="wallet-status" id="walletStatus">Not connected</div>
-    </div>
 
     <div class="generator-box">
         <input type="text" class="dog-input" id="dogInput" 
-               placeholder="Enter unique dog ID (min 4 characters)" 
+               placeholder="Enter unique dog name (min 4 characters)" 
                maxlength="16">
         <button class="generate-btn" id="generateBtn">GENERATE DOG</button>
         <div class="error-message" id="errorMessage"></div>
@@ -243,49 +192,18 @@
     </div>
 
     <footer>
-        <p>DogCraft v2.0 - Powered by Solana</p>
-        <p class="tooltip">
-            ⓘ How it works
-            <span class="tooltip-text">
-                Each dog is generated using your wallet address + unique ID.
-                The combination is hashed to create unique ASCII art!
-            </span>
-        </p>
+        <p>DogCraft v3.0 - Next-Gen ASCII Generator</p>
     </footer>
 
     <script>
         (function() {
-            const connectBtn = document.getElementById('connectBtn');
-            const walletStatus = document.getElementById('walletStatus');
             const generateBtn = document.getElementById('generateBtn');
             const dogInput = document.getElementById('dogInput');
             const dogDisplay = document.getElementById('dogDisplay');
             const loadingOverlay = document.getElementById('loadingOverlay');
             const errorMessage = document.getElementById('errorMessage');
 
-            let walletAddress = null;
-
-            // Improved Wallet Connection
-            async function connectWallet() {
-                try {
-                    if (!window.solana?.isPhantom) {
-                        throw new Error('Phantom wallet not detected!');
-                    }
-
-                    const response = await window.solana.connect();
-                    walletAddress = response.publicKey.toString();
-                    
-                    walletStatus.textContent = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
-                    walletStatus.style.color = var(--primary);
-                    connectBtn.style.display = 'none';
-                    
-                    showMessage('Wallet connected successfully!', 'success');
-                } catch (err) {
-                    showMessage(`Connection failed: ${err.message}`, 'error');
-                }
-            }
-
-            // Dog Generation Logic
+            // Dog Database
             const DOGS = [
                 {   
                     breed: 'Husky',
@@ -309,7 +227,8 @@
                     \\      _\\_  -'
                      \\  _-'   \\\`\\
                       '-'       \\_\\
-                    `
+                    `,
+                    colorClass: 'fur-black'
                 },
                 {
                     breed: 'Shiba',
@@ -319,7 +238,8 @@
                      /         O
                     /   (_____/
                    /_____/   U
-                    `
+                    `,
+                    colorClass: 'fur-golden'
                 },
                 {
                     breed: 'Retriever',
@@ -330,28 +250,88 @@
                      \\____\\
                      /    \\
                     /      \\
-                    `
+                    `,
+                    colorClass: 'fur-brown'
                 }
             ];
+
+            // Trait Systems
+            const PERSONALITY = [
+                { trait: 'Loyal', emoji: '🛡️', modifier: +15 },
+                { trait: 'Playful', emoji: '🎾', modifier: +25 },
+                { trait: 'Grumpy', emoji: '🌩️', modifier: -10 }
+            ];
+
+            const ABILITIES = [
+                { name: 'Super Bork', emoji: '🌀', effect: '2x bark power' },
+                { name: 'Treat Radar', emoji: '📍', effect: 'Finds hidden treats' },
+                { name: 'Zoomies', emoji: '⚡', effect: '+30% speed' }
+            ];
+
+            const BACKSTORY_PARTS = {
+                origins: ["Born in a digital realm", "Created from ancient code", "Forged in cyberspace"],
+                lives: ["protects data streams", "hunts bugs", "collects cookies"],
+                secrets: ["knows the meaning of 42", "has root access", "can parse HTML with mind"]
+            };
 
             function generateDogArt(seed) {
                 const hash = Array.from(seed).reduce((acc, char) => 
                     (acc << 5) - acc + char.charCodeAt(0), 0);
                 
                 const dogIndex = Math.abs(hash) % DOGS.length;
-                const variant = (hash >> 8) % 3;
-                const accessories = ['🦴', '🎀', '🧸', '🏷️'];
-                const accessory = accessories[Math.abs(hash >> 4) % accessories.length];
+                const dog = {...DOGS[dogIndex]};
+                
+                // Personality & Abilities
+                dog.personality = PERSONALITY[Math.abs(hash >> 8) % PERSONALITY.length];
+                dog.ability = ABILITIES[Math.abs(hash >> 16) % ABILITIES.length];
+                dog.barkPower = Math.min(100, Math.abs(hash % 100) + dog.personality.modifier);
+                
+                // Backstory Generation
+                dog.backstory = [
+                    BACKSTORY_PARTS.origins[hash % BACKSTORY_PARTS.origins.length],
+                    `They ${BACKSTORY_PARTS.lives[(hash >> 4) % BACKSTORY_PARTS.lives.length]}`,
+                    `and ${BACKSTORY_PARTS.secrets[(hash >> 8) % BACKSTORY_PARTS.secrets.length]}.`
+                ].join(' ');
+                
+                // DNA Visualization
+                dog.dna = Array.from({length: 16}, (_,i) => 
+                    (hash >> i).toString(2).padStart(8,'0')).join('-');
 
-                return {
-                    ...DOGS[dogIndex],
-                    variant,
-                    accessory,
-                    barkPower: Math.abs(hash % 100) + 1
-                };
+                // Color Variant
+                const colorIndex = (hash >> 20) % 4;
+                dog.colorClass = [
+                    'fur-brown', 'fur-golden', 
+                    'fur-black', 'fur-spotted'
+                ][colorIndex];
+
+                return dog;
             }
 
-            // UI Helpers
+            function displayDog(dog) {
+                dogDisplay.innerHTML = `
+                    <div class="dog-art ${dog.colorClass}">${dog.art}</div>
+                    <div class="traits-box">
+                        <div class="trait-item">
+                            ${dog.personality.emoji} <strong>Personality:</strong> ${dog.personality.trait}
+                        </div>
+                        <div class="trait-item">
+                            ${dog.ability.emoji} <strong>Ability:</strong> ${dog.ability.name} (${dog.ability.effect})
+                        </div>
+                        <div class="trait-item">
+                            📖 <strong>Backstory:</strong> ${dog.backstory}
+                        </div>
+                    </div>
+                    <div class="dna-display">
+                        🧬 GENETIC SEQUENCE:<br>
+                        ${dog.dna}
+                    </div>
+                    <div class="dog-info">
+                        <strong>Breed:</strong> ${dog.breed}<br>
+                        <strong>Bark Power:</strong> ${dog.barkPower}/100
+                    </div>
+                `;
+            }
+
             function showLoading(show) {
                 loadingOverlay.style.display = show ? 'flex' : 'none';
             }
@@ -364,35 +344,17 @@
             }
 
             // Event Listeners
-            connectBtn.addEventListener('click', connectWallet);
-
             generateBtn.addEventListener('click', async () => {
-                if (!walletAddress) {
-                    showMessage('Please connect wallet first!', 'error');
-                    return;
-                }
-
                 if (dogInput.value.length < 4) {
-                    showMessage('ID must be at least 4 characters!', 'error');
+                    showMessage('Name must be at least 4 characters!', 'error');
                     return;
                 }
 
                 try {
                     showLoading(true);
-                    const seed = walletAddress + dogInput.value;
-                    const dog = generateDogArt(seed);
-
-                    dogDisplay.innerHTML = `
-                        <div class="dog-art">${dog.art}</div>
-                        <div class="dog-info">
-                            Breed: ${dog.breed} #${dog.variant + 1}<br>
-                            Bark Power: ${dog.barkPower}/100<br>
-                            Accessory: ${dog.accessory}
-                        </div>
-                    `;
-
+                    const dog = generateDogArt(dogInput.value);
+                    displayDog(dog);
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    dogDisplay.style.opacity = 1;
                 } catch (err) {
                     showMessage(`Generation failed: ${err.message}`, 'error');
                 } finally {
@@ -401,10 +363,7 @@
             });
 
             // Initial setup
-            dogDisplay.style.opacity = 0;
-            if (window.solana?.isPhantom) {
-                window.solana.on('connect', () => connectWallet());
-            }
+            dogDisplay.style.opacity = 1;
         })();
     </script>
 </body>
