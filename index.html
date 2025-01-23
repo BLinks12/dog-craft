@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DogCraft 3.0 - Enhanced ASCII Dogs</title>
+    <title>DogCraft 5.0 - Final</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,6 +12,7 @@
             --background: #000814;
             --card-bg: #001220;
             --error: #ff004d;
+            --accent: #ff00ff;
         }
 
         * {
@@ -28,59 +29,74 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
         .header {
             text-align: center;
-            padding: 2rem;
+            padding: 4rem 2rem 2rem;
             width: 100%;
-            border-bottom: 3px solid var(--primary);
+            position: relative;
+            overflow: hidden;
         }
 
-        .header h1 {
-            font-family: 'Press Start 2P', cursive;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 15px var(--primary);
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            width: 200%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 25%,
+                var(--primary) 25% 75%,
+                transparent 75%
+            );
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(50%); }
         }
 
         .generator-box {
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
             background: var(--card-bg);
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+            position: relative;
+            border: 2px solid transparent;
+            background-clip: padding-box;
         }
 
         .dog-input {
             width: 100%;
-            padding: 1rem;
+            padding: 1.5rem;
             margin: 1rem 0;
-            background: transparent;
+            background: rgba(0,0,0,0.5);
             border: 2px solid var(--primary);
             color: var(--primary);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             border-radius: 5px;
+            transition: all 0.3s ease;
         }
 
         .generate-btn {
-            background: var(--secondary);
-            color: white;
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            color: black;
             border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
+            padding: 1.5rem 3rem;
+            font-size: 1.2rem;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s ease;
             border-radius: 5px;
-        }
-
-        .generate-btn:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px var(--primary);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            font-weight: bold;
         }
 
         .dog-display {
@@ -92,8 +108,68 @@
             font-family: 'Courier New', Courier, monospace;
             position: relative;
             overflow: hidden;
-            max-width: 600px;
+            max-width: 800px;
             width: 90%;
+        }
+
+        .cyber-border {
+            position: relative;
+            padding: 2rem;
+            border: 2px solid var(--primary);
+            background: 
+                linear-gradient(45deg, transparent 49.9%, rgba(0,255,157,0.1) 50%),
+                linear-gradient(-45deg, transparent 49.9%, rgba(0,255,157,0.1) 50%);
+            background-size: 20px 20px;
+        }
+
+        .dog-art {
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 0 0 15px currentColor;
+            margin: 2rem 0;
+            line-height: 1.2;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-item {
+            background: rgba(0,255,157,0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trait-box {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .trait-item {
+            background: rgba(0,0,0,0.5);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+
+        .dna-display {
+            background: rgba(0,0,0,0.5);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            word-break: break-all;
         }
 
         .loading-overlay {
@@ -103,135 +179,79 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0,0,0,0.9);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 5px solid var(--secondary);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        .error-message {
-            color: var(--error);
-            margin: 1rem 0;
-            text-align: center;
-            display: none;
-        }
-
-        footer {
-            margin-top: auto;
-            padding: 2rem;
-            text-align: center;
-            background: var(--card-bg);
-            width: 100%;
-        }
-
-        /* New Enhanced Styles */
-        .fur-brown { color: #8B4513; }
-        .fur-golden { color: #FFD700; }
-        .fur-black { color: #2c2c2c; }
-        .fur-spotted { 
-            background: linear-gradient(45deg, #2c2c2c 25%, #8B4513 25% 50%, #FFD700 50% 75%, #fff 75%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .dna-display {
-            font-family: monospace;
-            letter-spacing: 2px;
-            color: #00ff9d;
-            margin: 1rem 0;
-            word-break: break-all;
-        }
-        
-        .traits-box {
-            border: 1px solid var(--primary);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 5px;
-        }
-        
-        .trait-item {
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background: rgba(0, 255, 157, 0.1);
-            border-radius: 3px;
-        }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .fur-golden { color: #FFD700; }
+        .fur-brown { color: #8B4513; }
+        .fur-spotted { color: #fff; }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>DogCraft 3.0</h1>
-        <p>Advanced ASCII Dog Generator</p>
+        <h1>DOG CRAFT v5.0</h1>
+        <p>Ultimate ASCII Canine Generator</p>
     </header>
 
     <div class="generator-box">
         <input type="text" class="dog-input" id="dogInput" 
-               placeholder="Enter unique dog name (min 4 characters)" 
-               maxlength="16">
-        <button class="generate-btn" id="generateBtn">GENERATE DOG</button>
-        <div class="error-message" id="errorMessage"></div>
+               placeholder="ENTER DOG NAME (MIN 4 CHARACTERS)" 
+               maxlength="24">
+        <button class="generate-btn" id="generateBtn">GENERATE CANINE</button>
     </div>
 
-    <div class="dog-display" id="dogDisplay"></div>
+    <div class="dog-display" id="dogDisplay">
+        <div class="cyber-border" id="cyberBorder">
+            <!-- Content will be populated here -->
+        </div>
+    </div>
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
 
-    <footer>
-        <p>DogCraft v3.0 - Next-Gen ASCII Generator</p>
-    </footer>
-
     <script>
         (function() {
-            const generateBtn = document.getElementById('generateBtn');
-            const dogInput = document.getElementById('dogInput');
-            const dogDisplay = document.getElementById('dogDisplay');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const errorMessage = document.getElementById('errorMessage');
-
-            // Dog Database
             const DOGS = [
-                {   
-                    breed: 'Husky',
+                {
+                    breed: 'CYBER HUSKY',
                     art: `
-                    __
-                   (  \\\`\\\`-'''-/\\)
-                    |\\ \\\\      / /
-                     \\ \\\\    / /
-                     :  |   /_/
-                     |  |  (
-                     |  |   \\
-                     |  |    )
-                     ;  |    :
-                    /   |     \\
-                   /    |      \\
-                  (     |       \\
-                  |\\    \\       \\
-                  | )    \\      _\\
-                  |/      \\    (  \\
-                  (_       \\    \\_/
-                    \\      _\\_  -'
-                     \\  _-'   \\\`\\
-                      '-'       \\_\\
+                    ░▒▓█████▓▒░          
+                ▒▓██▓▒░░▒▓██▓▒░        
+              ░▓█▓▒░░▒▓█████▓▒░▒▓█▓▒░  
+             ▒██▓▒░▓█████▓▒░░▒▓████▓▒░ 
+            ░███▓▒▒████▓▒░░▒▓█████▓▒░░  
+            ▒████████▓▒░░▒▓█████▓▒░░    
+            ░██████▓▒░░▒▓█████▓▒░░      
+             ▒████▒░░▒▓█████▓▒░░        
+              ░██▓▒░▓█████▓▒░░          
+                ▒░▓████▓▒░              
+                   ░▒█▓▒░               
+                    ░▒▓█▓▒░            
+                  ░▓██████▓▒░          
+                 ▒██▓▒░░▒▓██▓▒░        
+                ░██▓▒░  ░▒▓██▓▒░       
                     `,
-                    colorClass: 'fur-black'
+                    colors: ['fur-golden', 'fur-brown', 'fur-spotted']
                 },
                 {
-                    breed: 'Shiba',
+                    breed: 'RETRO SHIBA',
                     art: `
                       / \\__
                      (    @\\___
@@ -239,131 +259,102 @@
                     /   (_____/
                    /_____/   U
                     `,
-                    colorClass: 'fur-golden'
-                },
-                {
-                    breed: 'Retriever',
-                    art: `
-                     / \\__
-                    (  o o\\
-                    \\  0 /_
-                     \\____\\
-                     /    \\
-                    /      \\
-                    `,
-                    colorClass: 'fur-brown'
+                    colors: ['fur-golden', 'fur-brown']
                 }
             ];
 
-            // Trait Systems
-            const PERSONALITY = [
-                { trait: 'Loyal', emoji: '🛡️', modifier: +15 },
-                { trait: 'Playful', emoji: '🎾', modifier: +25 },
-                { trait: 'Grumpy', emoji: '🌩️', modifier: -10 }
-            ];
-
-            const ABILITIES = [
-                { name: 'Super Bork', emoji: '🌀', effect: '2x bark power' },
-                { name: 'Treat Radar', emoji: '📍', effect: 'Finds hidden treats' },
-                { name: 'Zoomies', emoji: '⚡', effect: '+30% speed' }
-            ];
-
-            const BACKSTORY_PARTS = {
-                origins: ["Born in a digital realm", "Created from ancient code", "Forged in cyberspace"],
-                lives: ["protects data streams", "hunts bugs", "collects cookies"],
-                secrets: ["knows the meaning of 42", "has root access", "can parse HTML with mind"]
+            const TRAITS = {
+                personality: [
+                    { name: 'PLAYFUL', emoji: '🎾', effect: '+25% Energy' },
+                    { name: 'LOYAL', emoji: '🛡️', effect: '+30% Defense' },
+                    { name: 'CURIOUS', emoji: '🔍', effect: 'Finds hidden items' }
+                ],
+                abilities: [
+                    { name: 'SUPER BORK', emoji: '🌀', effect: 'Sonic bark attack' },
+                    { name: 'TREAT RADAR', emoji: '📍', effect: 'Locates snacks' },
+                    { name: 'ZOOMIES', emoji: '⚡', effect: 'Hyper speed mode' }
+                ],
+                backstory: [
+                    "Forged in the digital kennel",
+                    "Born from ancient code",
+                    "Created by rogue AI"
+                ]
             };
 
-            function generateDogArt(seed) {
-                const hash = Array.from(seed).reduce((acc, char) => 
+            function generateHash(input) {
+                return Array.from(input).reduce((acc, char) => 
                     (acc << 5) - acc + char.charCodeAt(0), 0);
-                
-                const dogIndex = Math.abs(hash) % DOGS.length;
-                const dog = {...DOGS[dogIndex]};
-                
-                // Personality & Abilities
-                dog.personality = PERSONALITY[Math.abs(hash >> 8) % PERSONALITY.length];
-                dog.ability = ABILITIES[Math.abs(hash >> 16) % ABILITIES.length];
-                dog.barkPower = Math.min(100, Math.abs(hash % 100) + dog.personality.modifier);
-                
-                // Backstory Generation
-                dog.backstory = [
-                    BACKSTORY_PARTS.origins[hash % BACKSTORY_PARTS.origins.length],
-                    `They ${BACKSTORY_PARTS.lives[(hash >> 4) % BACKSTORY_PARTS.lives.length]}`,
-                    `and ${BACKSTORY_PARTS.secrets[(hash >> 8) % BACKSTORY_PARTS.secrets.length]}.`
-                ].join(' ');
-                
-                // DNA Visualization
-                dog.dna = Array.from({length: 16}, (_,i) => 
-                    (hash >> i).toString(2).padStart(8,'0')).join('-');
+            }
 
-                // Color Variant
-                const colorIndex = (hash >> 20) % 4;
-                dog.colorClass = [
-                    'fur-brown', 'fur-golden', 
-                    'fur-black', 'fur-spotted'
-                ][colorIndex];
-
-                return dog;
+            function createDog(name) {
+                const hash = generateHash(name);
+                const breed = DOGS[Math.abs(hash) % DOGS.length];
+                const color = breed.colors[Math.abs(hash >> 8) % breed.colors.length];
+                
+                return {
+                    art: breed.art,
+                    breed: breed.breed,
+                    color: color,
+                    personality: TRAITS.personality[Math.abs(hash >> 4) % TRAITS.personality.length],
+                    ability: TRAITS.abilities[Math.abs(hash >> 16) % TRAITS.abilities.length],
+                    backstory: TRAITS.backstory[Math.abs(hash >> 20) % TRAITS.backstory.length],
+                    dna: Array.from({length: 4}, (_,i) => 
+                        (hash >> i * 8).toString(2).padStart(8,'0')).join('-'),
+                    barkPower: Math.abs(hash % 100) + 1
+                };
             }
 
             function displayDog(dog) {
-                dogDisplay.innerHTML = `
-                    <div class="dog-art ${dog.colorClass}">${dog.art}</div>
-                    <div class="traits-box">
+                const cyberBorder = document.getElementById('cyberBorder');
+                cyberBorder.innerHTML = `
+                    <div class="dog-art ${dog.color}">${dog.art}</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            🧬 <strong>BREED</strong><br>${dog.breed}
+                        </div>
+                        <div class="stat-item">
+                            ⚡ <strong>POWER</strong><br>
+                            ${Math.min(100, dog.barkPower)}/100
+                        </div>
+                    </div>
+                    <div class="trait-box">
                         <div class="trait-item">
-                            ${dog.personality.emoji} <strong>Personality:</strong> ${dog.personality.trait}
+                            ${dog.personality.emoji} <strong>${dog.personality.name}</strong><br>
+                            ${dog.personality.effect}
                         </div>
                         <div class="trait-item">
-                            ${dog.ability.emoji} <strong>Ability:</strong> ${dog.ability.name} (${dog.ability.effect})
-                        </div>
-                        <div class="trait-item">
-                            📖 <strong>Backstory:</strong> ${dog.backstory}
+                            ${dog.ability.emoji} <strong>${dog.ability.name}</strong><br>
+                            ${dog.ability.effect}
                         </div>
                     </div>
                     <div class="dna-display">
-                        🧬 GENETIC SEQUENCE:<br>
+                        GENETIC SEQUENCE:<br>
                         ${dog.dna}
                     </div>
-                    <div class="dog-info">
-                        <strong>Breed:</strong> ${dog.breed}<br>
-                        <strong>Bark Power:</strong> ${dog.barkPower}/100
+                    <div class="trait-item">
+                        📖 <strong>ORIGIN</strong><br>
+                        ${dog.backstory}
                     </div>
                 `;
             }
 
-            function showLoading(show) {
-                loadingOverlay.style.display = show ? 'flex' : 'none';
-            }
-
-            function showMessage(text, type = 'info') {
-                errorMessage.style.color = type === 'error' ? 'var(--error)' : 'var(--primary)';
-                errorMessage.textContent = text;
-                errorMessage.style.display = 'block';
-                setTimeout(() => errorMessage.style.display = 'none', 5000);
-            }
-
             // Event Listeners
-            generateBtn.addEventListener('click', async () => {
-                if (dogInput.value.length < 4) {
-                    showMessage('Name must be at least 4 characters!', 'error');
+            document.getElementById('generateBtn').addEventListener('click', () => {
+                const input = document.getElementById('dogInput').value.trim();
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                
+                if (input.length < 4) {
+                    alert('Name must be at least 4 characters!');
                     return;
                 }
 
-                try {
-                    showLoading(true);
-                    const dog = generateDogArt(dogInput.value);
+                loadingOverlay.style.display = 'flex';
+                setTimeout(() => {
+                    const dog = createDog(input);
                     displayDog(dog);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                } catch (err) {
-                    showMessage(`Generation failed: ${err.message}`, 'error');
-                } finally {
-                    showLoading(false);
-                }
+                    loadingOverlay.style.display = 'none';
+                }, 1500);
             });
-
-            // Initial setup
-            dogDisplay.style.opacity = 1;
         })();
     </script>
 </body>
