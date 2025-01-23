@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DogCraft - ASCII Dog Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff9d;
+            --secondary: #007a46;
+            --background: #000814;
+            --card-bg: #001220;
+            --error: #ff004d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--primary);
+            font-family: 'Ubuntu Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(45deg, var(--secondary), transparent);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .header h1 {
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px var(--primary);
+        }
+
+        .wallet-section {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1rem;
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+        }
+
+        .connect-btn {
+            background: var(--secondary);
+            color: white;
+            border: 2px solid var(--primary);
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .connect-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .wallet-status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            border-radius: 5px;
+        }
+
+        .generator-box {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+        }
+
+        .dog-input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 1.1rem;
+            border-radius: 5px;
+        }
+
+        .generate-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .generate-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .dog-display {
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            white-space: pre;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dog-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                var(--primary) 50%,
+                transparent 55%
+            );
+            animation: scan 4s infinite linear;
+            opacity: 0.1;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--secondary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: var(--error);
+            margin: 1rem 0;
+            text-align: center;
+            display: none;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            text-align: center;
+            background: var(--card-bg);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background: var(--card-bg);
+            color: var(--primary);
+            text-align: center;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>DogCraft 2.0</h1>
+        <p>Generate Unique ASCII Dogs on Solana</p>
+    </header>
+
+    <div class="wallet-section">
+        <button class="connect-btn" id="connectBtn">CONNECT PHANTOM WALLET</button>
+        <div class="wallet-status" id="walletStatus">Not connected</div>
+    </div>
+
+    <div class="generator-box">
+        <input type="text" class="dog-input" id="dogInput" 
+               placeholder="Enter unique dog ID (min 4 characters)" 
+               maxlength="16">
+        <button class="generate-btn" id="generateBtn">GENERATE DOG</button>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="dog-display" id="dogDisplay"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <footer>
+        <p>DogCraft v2.0 - Powered by Solana</p>
+        <p class="tooltip">
+            ⓘ How it works
+            <span class="tooltip-text">
+                Each dog is generated using your wallet address + unique ID.
+                The combination is hashed to create unique ASCII art!
+            </span>
+        </p>
+    </footer>
+
+    <script>
+        (function() {
+            const connectBtn = document.getElementById('connectBtn');
+            const walletStatus = document.getElementById('walletStatus');
+            const generateBtn = document.getElementById('generateBtn');
+            const dogInput = document.getElementById('dogInput');
+            const dogDisplay = document.getElementById('dogDisplay');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const errorMessage = document.getElementById('errorMessage');
+
+            let walletAddress = null;
+
+            // Improved Wallet Connection
+            async function connectWallet() {
+                try {
+                    if (!window.solana?.isPhantom) {
+                        throw new Error('Phantom wallet not detected!');
+                    }
+
+                    const response = await window.solana.connect();
+                    walletAddress = response.publicKey.toString();
+                    
+                    walletStatus.textContent = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+                    walletStatus.style.color = var(--primary);
+                    connectBtn.style.display = 'none';
+                    
+                    showMessage('Wallet connected successfully!', 'success');
+                } catch (err) {
+                    showMessage(`Connection failed: ${err.message}`, 'error');
+                }
+            }
+
+            // Dog Generation Logic
+            const DOGS = [
+                {   
+                    breed: 'Husky',
+                    art: `
+                    __
+                   (  \\\`\\\`-'''-/\\)
+                    |\\ \\\\      / /
+                     \\ \\\\    / /
+                     :  |   /_/
+                     |  |  (
+                     |  |   \\
+                     |  |    )
+                     ;  |    :
+                    /   |     \\
+                   /    |      \\
+                  (     |       \\
+                  |\\    \\       \\
+                  | )    \\      _\\
+                  |/      \\    (  \\
+                  (_       \\    \\_/
+                    \\      _\\_  -'
+                     \\  _-'   \\\`\\
+                      '-'       \\_\\
+                    `
+                },
+                {
+                    breed: 'Shiba',
+                    art: `
+                      / \\__
+                     (    @\\___
+                     /         O
+                    /   (_____/
+                   /_____/   U
+                    `
+                },
+                {
+                    breed: 'Retriever',
+                    art: `
+                     / \\__
+                    (  o o\\
+                    \\  0 /_
+                     \\____\\
+                     /    \\
+                    /      \\
+                    `
+                }
+            ];
+
+            function generateDogArt(seed) {
+                const hash = Array.from(seed).reduce((acc, char) => 
+                    (acc << 5) - acc + char.charCodeAt(0), 0);
+                
+                const dogIndex = Math.abs(hash) % DOGS.length;
+                const variant = (hash >> 8) % 3;
+                const accessories = ['🦴', '🎀', '🧸', '🏷️'];
+                const accessory = accessories[Math.abs(hash >> 4) % accessories.length];
+
+                return {
+                    ...DOGS[dogIndex],
+                    variant,
+                    accessory,
+                    barkPower: Math.abs(hash % 100) + 1
+                };
+            }
+
+            // UI Helpers
+            function showLoading(show) {
+                loadingOverlay.style.display = show ? 'flex' : 'none';
+            }
+
+            function showMessage(text, type = 'info') {
+                errorMessage.style.color = type === 'error' ? 'var(--error)' : 'var(--primary)';
+                errorMessage.textContent = text;
+                errorMessage.style.display = 'block';
+                setTimeout(() => errorMessage.style.display = 'none', 5000);
+            }
+
+            // Event Listeners
+            connectBtn.addEventListener('click', connectWallet);
+
+            generateBtn.addEventListener('click', async () => {
+                if (!walletAddress) {
+                    showMessage('Please connect wallet first!', 'error');
+                    return;
+                }
+
+                if (dogInput.value.length < 4) {
+                    showMessage('ID must be at least 4 characters!', 'error');
+                    return;
+                }
+
+                try {
+                    showLoading(true);
+                    const seed = walletAddress + dogInput.value;
+                    const dog = generateDogArt(seed);
+
+                    dogDisplay.innerHTML = `
+                        <div class="dog-art">${dog.art}</div>
+                        <div class="dog-info">
+                            Breed: ${dog.breed} #${dog.variant + 1}<br>
+                            Bark Power: ${dog.barkPower}/100<br>
+                            Accessory: ${dog.accessory}
+                        </div>
+                    `;
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    dogDisplay.style.opacity = 1;
+                } catch (err) {
+                    showMessage(`Generation failed: ${err.message}`, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            // Initial setup
+            dogDisplay.style.opacity = 0;
+            if (window.solana?.isPhantom) {
+                window.solana.on('connect', () => connectWallet());
+            }
+        })();
+    </script>
+</body>
+</html>
